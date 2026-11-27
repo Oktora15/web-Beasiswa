@@ -38,7 +38,7 @@ class ScholarshipPlatformTest extends TestCase
 
     public function test_student_can_register_and_only_student_role_is_assigned(): void
     {
-        $response = $this->post(route('register.store'), [
+        $response = $this->post(route('register'), [
             'name' => 'Mahasiswa Uji',
             'email' => 'uji@example.test',
             'password' => 'Password-123!',
