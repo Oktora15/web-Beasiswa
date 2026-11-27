@@ -33,6 +33,61 @@ class ScholarshipRequest extends FormRequest
             'official_url' => ['required', 'url:http,https', 'max:2048'],
             'description' => ['required', 'string', 'max:10000'],
             'is_active' => ['required', 'boolean'],
+            'criteria' => ['nullable', 'array'],
+            'criteria.*' => ['required', 'integer', 'distinct', Rule::exists('criteria', 'id')],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'Nama beasiswa wajib diisi.',
+            'title.string' => 'Nama beasiswa harus berupa teks.',
+            'title.max' => 'Nama beasiswa maksimal :max karakter.',
+            'slug.required' => 'Slug URL wajib diisi.',
+            'slug.string' => 'Slug URL harus berupa teks.',
+            'slug.max' => 'Slug URL maksimal :max karakter.',
+            'slug.unique' => 'Slug URL sudah digunakan.',
+            'provider.required' => 'Penyedia beasiswa wajib diisi.',
+            'provider.string' => 'Penyedia beasiswa harus berupa teks.',
+            'provider.max' => 'Nama penyedia maksimal :max karakter.',
+            'country.required' => 'Negara beasiswa wajib diisi.',
+            'country.string' => 'Negara beasiswa harus berupa teks.',
+            'country.max' => 'Negara beasiswa maksimal :max karakter.',
+            'degree_level.required' => 'Jenjang beasiswa wajib dipilih.',
+            'degree_level.in' => 'Jenjang yang dipilih tidak valid.',
+            'funding_type.required' => 'Jenis pendanaan wajib dipilih.',
+            'funding_type.in' => 'Jenis pendanaan yang dipilih tidak valid.',
+            'language_test.required' => 'Persyaratan tes bahasa wajib dipilih.',
+            'language_test.in' => 'Persyaratan tes bahasa yang dipilih tidak valid.',
+            'return_obligation.required' => 'Pilihan kewajiban kembali wajib dipilih.',
+            'return_obligation.boolean' => 'Pilihan kewajiban kembali tidak valid.',
+            'return_duration_years.integer' => 'Durasi kewajiban kembali harus berupa bilangan bulat.',
+            'return_duration_years.min' => 'Durasi kewajiban kembali minimal :min tahun.',
+            'return_duration_years.max' => 'Durasi kewajiban kembali maksimal :max tahun.',
+            'min_gpa.numeric' => 'IPK minimum harus berupa angka.',
+            'min_gpa.between' => 'IPK minimum harus berada di antara 0 dan 4.',
+            'max_age.integer' => 'Batas usia harus berupa bilangan bulat.',
+            'max_age.between' => 'Batas usia harus berada di antara 16 dan 100 tahun.',
+            'open_date.date' => 'Tanggal pembukaan tidak valid.',
+            'deadline.required' => 'Deadline beasiswa wajib diisi.',
+            'deadline.date' => 'Tanggal deadline tidak valid.',
+            'official_url.required' => 'URL resmi wajib diisi.',
+            'official_url.url' => 'URL resmi harus menggunakan alamat HTTP atau HTTPS yang valid.',
+            'official_url.max' => 'URL resmi maksimal :max karakter.',
+            'description.required' => 'Deskripsi beasiswa wajib diisi.',
+            'description.string' => 'Deskripsi beasiswa harus berupa teks.',
+            'description.max' => 'Deskripsi beasiswa maksimal :max karakter.',
+            'is_active.required' => 'Status visibilitas beasiswa wajib dipilih.',
+            'is_active.boolean' => 'Status visibilitas beasiswa tidak valid.',
+            'criteria.array' => 'Daftar kriteria tambahan tidak valid.',
+            'criteria.*.required' => 'Setiap kriteria tambahan harus dipilih.',
+            'criteria.*.integer' => 'Kriteria tambahan yang dipilih tidak valid.',
+            'criteria.*.distinct' => 'Kriteria tambahan tidak boleh dipilih lebih dari sekali.',
+            'criteria.*.exists' => 'Salah satu kriteria tambahan tidak tersedia.',
         ];
     }
 }

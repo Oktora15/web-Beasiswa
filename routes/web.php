@@ -16,6 +16,7 @@ Route::get('/beasiswa/{scholarship:slug}', [ScholarshipController::class, 'show'
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
     Route::get('/lamaran', [AdminApplicationController::class, 'index'])->name('applications.index');
+    Route::get('/lamaran/{application}', [AdminApplicationController::class, 'show'])->name('applications.show');
     Route::patch('/lamaran/{application}', [AdminApplicationController::class, 'update'])->name('applications.update');
     Route::get('/dokumen/{document}', [AdminApplicationController::class, 'downloadDocument'])->name('documents.download');
     Route::get('/beasiswa', [ScholarshipController::class, 'adminIndex'])->name('scholarships.index');
@@ -32,6 +33,7 @@ Route::middleware(['auth', 'student'])->group(function () {
     Route::get('/simpanan', [BookmarkController::class, 'index'])->name('bookmarks.index');
     Route::post('/beasiswa/{scholarship:slug}/simpan', [BookmarkController::class, 'toggle'])->name('bookmarks.toggle');
     Route::get('/lamaran', [ApplicationController::class, 'index'])->name('applications.index');
+    Route::get('/lamaran/{application}', [ApplicationController::class, 'show'])->name('applications.show');
     Route::post('/beasiswa/{scholarship:slug}/daftar', [ApplicationController::class, 'store'])->name('applications.store');
 });
 

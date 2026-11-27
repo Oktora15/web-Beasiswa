@@ -14,6 +14,10 @@
                 <input class="field mt-1" type="date" name="birth_date" value="{{ old('birth_date', $profile->birth_date?->format('Y-m-d')) }}">
                 @error('birth_date')<span class="mt-1 block text-sm text-rose-700">{{ $message }}</span>@enderror
             </label>
+            <label class="text-sm font-semibold">Negara asal
+                <input class="field mt-1" type="text" name="country_of_origin" maxlength="100" value="{{ old('country_of_origin', $profile->country_of_origin) }}" placeholder="Contoh: Indonesia">
+                @error('country_of_origin')<span class="mt-1 block text-sm text-rose-700">{{ $message }}</span>@enderror
+            </label>
             <label class="text-sm font-semibold">Skor IELTS
                 <input class="field mt-1" type="number" step="0.5" min="0" max="9" name="ielts_score" value="{{ old('ielts_score', $profile->ielts_score) }}" placeholder="0–9">
                 @error('ielts_score')<span class="mt-1 block text-sm text-rose-700">{{ $message }}</span>@enderror

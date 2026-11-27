@@ -2,14 +2,67 @@
 
 Platform informasi, pendaftaran, dan manajemen beasiswa menggunakan Laravel 13, MySQL, Blade, Tailwind CSS, dan Livewire.
 
-## Menjalankan aplikasi
+## Prasyarat
 
-1. Salin `.env.example` menjadi `.env`, lalu isi kredensial MySQL dan SMTP. Zona waktu bawaan adalah `Asia/Jakarta`.
-2. Jalankan `composer install`, `npm.cmd install`, dan `php artisan key:generate`.
-3. Buat database MySQL `beasiswahub`, lalu jalankan `php artisan migrate --seed`.
-4. Jalankan aplikasi dan aset dengan `composer run dev`.
+- PHP 8.3 atau lebih baru dengan ekstensi yang dibutuhkan Laravel.
+- Composer.
+- MySQL.
+- Node.js dan npm.
 
-Seeder membuat 20 beasiswa, kriteria, dan tiga akun mahasiswa. Di lingkungan `local`/`testing`, kredensial demo bawaan tersedia hanya untuk pengembangan:
+## Instalasi lokal
+
+1. Pasang dependency PHP:
+
+   ```powershell
+   composer install
+   ```
+
+2. Salin `.env.example` menjadi `.env`, lalu atur koneksi MySQL, `APP_URL`, dan `APP_TIMEZONE=Asia/Jakarta`. Buat database MySQL bernama `beasiswahub` atau sesuaikan `DB_DATABASE`.
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+3. Buat application key dan jalankan migration serta seeder:
+
+   ```powershell
+   php artisan key:generate
+   php artisan migrate --seed
+   ```
+
+4. Pasang dependency frontend dan build aset:
+
+   ```powershell
+   npm.cmd install
+   npm.cmd run build
+   ```
+
+5. Untuk mengembangkan aplikasi, jalankan perintah berikut di terminal terpisah:
+
+   ```powershell
+   php artisan serve
+   npm.cmd run dev
+   php artisan queue:work
+   php artisan schedule:work
+   ```
+
+`schedule:work` memeriksa jadwal setiap menit. Pengingat email dijadwalkan setiap hari pukul 09.00 menurut zona waktu aplikasi, untuk beasiswa aktif yang disimpan mahasiswa dan deadline-nya H-7 atau H-1.
+
+## Konfigurasi email dan worker
+
+`MAIL_MAILER=log` dapat digunakan untuk development; isi SMTP di `.env` (`MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, dan `MAIL_FROM_ADDRESS`) untuk mengirim email sungguhan. Pengingat dikirim sebagai queued notification. Karena `QUEUE_CONNECTION=database`, worker `php artisan queue:work` harus tetap berjalan agar email diproses.
+
+Untuk production, jalankan scheduler melalui cron setiap menit:
+
+```cron
+* * * * * cd /path/to/web-Beasiswa && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Jalankan juga queue worker sebagai proses terkelola (misalnya dengan Supervisor). Periksa jadwal terdaftar menggunakan `php artisan schedule:list`.
+
+## Akun demo
+
+Seeder membuat 20 beasiswa, kriteria, dan tiga akun mahasiswa. Kredensial demo bawaan hanya digunakan pada lingkungan `local`/`testing`:
 
 | Peran | Email | Kata sandi |
 |---|---|---|
@@ -18,15 +71,22 @@ Seeder membuat 20 beasiswa, kriteria, dan tiga akun mahasiswa. Di lingkungan `lo
 | Mahasiswa | `bima.pratama@beasiswahub.test` | `StudentDemo2!2026` |
 | Mahasiswa | `citra.rahman@beasiswahub.test` | `StudentDemo3!2026` |
 
-Ganti kredensial demo sebelum memakai lingkungan bersama. Seeder tidak menggunakan kredensial bawaan di production: atur email dan kata sandi khusus melalui `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `SEED_STUDENT_1_EMAIL`, `SEED_STUDENT_1_PASSWORD`, dan pasangan variabel `SEED_STUDENT_2_*` serta `SEED_STUDENT_3_*`.
+Ganti kredensial demo sebelum memakai lingkungan bersama. Seeder tidak menggunakan kredensial bawaan di production: atur email dan kata sandi melalui `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `SEED_STUDENT_1_EMAIL`, `SEED_STUDENT_1_PASSWORD`, dan pasangan variabel `SEED_STUDENT_2_*` serta `SEED_STUDENT_3_*`.
 
 Tanggal deadline beasiswa contoh bersifat indikatif dan dihitung relatif terhadap tanggal seeding; periksa situs resmi program sebelum mengajukan pendaftaran.
 
 ## Fitur
 
-- Daftar publik dengan pencarian, filter negara/jenjang/pendanaan/syarat bahasa/IPK/usia/kewajiban kembali, status pembukaan, dan urutan deadline.
-- Registrasi, profil akademik, bookmark, pendaftaran beserta berkas privat, serta pelacakan status mahasiswa.
-- CRUD beasiswa dan peninjauan lamaran untuk admin.
-- Pengingat email H-7 dan H-1 untuk beasiswa yang disimpan. Atur SMTP, lalu jalankan scheduler Laravel melalui cron atau `php artisan schedule:work`.
+- Katalog publik dengan pencarian, filter beasiswa, dan urutan deadline.
+- Autentikasi Laravel Breeze (Blade) dengan role admin dan mahasiswa.
+- Profil akademik, bookmark, pendaftaran dengan dokumen privat, dan pelacakan status lamaran.
+- CRUD beasiswa, review lamaran, dan statistik admin.
+- Email pengingat deadline H-7 dan H-1 untuk beasiswa tersimpan.
 
-Jalankan pengujian dengan `php artisan test` dan build frontend dengan `npm.cmd run build`.
+## Pengujian
+
+Jalankan feature test dengan:
+
+```powershell
+php artisan test
+```

@@ -47,23 +47,50 @@
                     <a class="button-secondary mt-5 w-full justify-center" href="{{ route('login') }}">Masuk untuk menyimpan</a>
                 @endauth
             </div>
+            @if ($eligibility !== null)
+                <div class="card p-6">
+                    <h2 class="text-lg font-bold text-slate-950">Kecocokan profil Anda</h2>
+                    <p class="mt-1 text-sm text-slate-500">Dibandingkan dengan IPK minimum dan batas usia program.</p>
+                    <dl class="mt-4 space-y-3">
+                        @foreach (['gpa' => 'IPK', 'age' => 'Batas usia'] as $criterion => $label)
+                            @php
+                                $status = $eligibility[$criterion];
+                                $statusLabel = $status === null ? 'Lengkapi profil' : ($status ? 'Memenuhi' : 'Belum memenuhi');
+                                $statusClass = $status === null
+                                    ? 'bg-amber-50 text-amber-800'
+                                    : ($status ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700');
+                            @endphp
+                            <div class="flex items-center justify-between gap-4 text-sm">
+                                <dt class="font-medium text-slate-600">{{ $label }}</dt>
+                                <dd><span class="rounded-full px-3 py-1 font-semibold {{ $statusClass }}">{{ $statusLabel }}</span></dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                    @if (in_array(null, $eligibility, true))
+                        <a class="mt-4 inline-flex text-sm font-semibold text-indigo-700 hover:text-indigo-900" href="{{ route('profile.edit') }}">Lengkapi profil untuk hasil lebih akurat →</a>
+                    @endif
+                </div>
+            @endif
             @auth
                 @if (auth()->user()->role === 'student' && $scholarship->deadline->greaterThanOrEqualTo(today()))
-                    @if ($application && $application->status !== 'draft')
-                        <div class="card p-6"><h2 class="font-bold text-slate-950">Lamaran sudah dikirim</h2><p class="mt-2 text-sm text-slate-500">Status saat ini: {{ $application->status }}.</p><a class="mt-3 inline-block font-semibold text-indigo-700" href="{{ route('applications.index') }}">Pantau lamaran →</a></div>
+                    @if ($application && $application->status->value !== 'draft')
+                        <div class="card p-6"><h2 class="font-bold text-slate-950">Lamaran sudah dikirim</h2><p class="mt-2 text-sm text-slate-500">Status saat ini: {{ $application->status->label() }}.</p><a class="mt-3 inline-block font-semibold text-indigo-700" href="{{ route('applications.index') }}">Pantau lamaran →</a></div>
                     @else
                         <form class="card space-y-4 p-6" method="POST" enctype="multipart/form-data" action="{{ route('applications.store', $scholarship) }}">
                             @csrf
-                            <div><h2 class="text-lg font-bold text-slate-950">{{ $application ? 'Lanjutkan draf lamaran' : 'Daftar beasiswa' }}</h2><p class="mt-1 text-sm text-slate-500">Berkas PDF atau gambar, maks. 5 MB per file dan 8 file per lamaran.</p></div>
+                            <div><h2 class="text-lg font-bold text-slate-950">{{ $application ? 'Lanjutkan draf lamaran' : 'Daftar beasiswa' }}</h2><p class="mt-1 text-sm text-slate-500">Setiap dokumen harus berupa PDF, maksimal 2 MB. CV, transkrip, dan surat motivasi wajib untuk mengirim lamaran.</p></div>
                             <label class="block text-sm font-medium">Motivasi
-                                <textarea name="motivation" rows="4" maxlength="5000" class="field mt-1" placeholder="Ceritakan alasan Anda mendaftar (min. 50 karakter)">{{ old('motivation', $application?->motivation) }}</textarea>
+                                <textarea name="motivation" rows="4" maxlength="5000" class="field mt-1" placeholder="Catatan tambahan (opsional)">{{ old('motivation', $application?->motivation) }}</textarea>
                             </label>
-                            <label class="block text-sm font-medium">Dokumen pendukung
-                                <input name="documents[]" type="file" accept=".pdf,.jpg,.jpeg,.png" multiple class="field mt-1">
-                                @if ($application?->documents->isNotEmpty())<span class="mt-1 block text-xs text-slate-500">{{ $application->documents->count() }} dokumen sudah tersimpan.</span>@endif
-                            </label>
-                            @error('documents')<p class="text-sm text-rose-700">{{ $message }}</p>@enderror
-                            @error('documents.*')<p class="text-sm text-rose-700">{{ $message }}</p>@enderror
+                            @foreach (['cv' => 'CV', 'transcript' => 'Transkrip', 'motivation_letter' => 'Surat motivasi', 'language_certificate' => 'Sertifikat bahasa (opsional)'] as $field => $label)
+                                @php($savedDocument = $application?->documents->firstWhere('document_type', $field))
+                                <label class="block text-sm font-medium">{{ $label }}
+                                    <input name="{{ $field }}" type="file" accept=".pdf,application/pdf" class="field mt-1">
+                                    @if ($savedDocument)<span class="mt-1 block text-xs text-emerald-700">Tersimpan: {{ $savedDocument->original_name }}</span>@endif
+                                    @error($field)<span class="mt-1 block text-sm text-rose-700">{{ $message }}</span>@enderror
+                                </label>
+                            @endforeach
+                            @error('intent')<p class="text-sm text-rose-700">{{ $message }}</p>@enderror
                             <button class="button-secondary w-full justify-center" type="submit" name="intent" value="draft">Simpan sebagai draf</button>
                             <button class="button-primary w-full justify-center" type="submit" name="intent" value="submit">Kirim lamaran</button>
                         </form>

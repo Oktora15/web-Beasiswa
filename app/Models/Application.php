@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\ApplicationStatus;
 use Database\Factories\ApplicationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,10 @@ class Application extends Model
 
     protected function casts(): array
     {
-        return ['submitted_at' => 'datetime'];
+        return [
+            'status' => ApplicationStatus::class,
+            'submitted_at' => 'datetime',
+        ];
     }
 
     public function user(): BelongsTo

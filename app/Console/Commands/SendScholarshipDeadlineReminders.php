@@ -2,10 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Mail\DeadlineReminder;
 use App\Models\Bookmark;
+use App\Notifications\ScholarshipDeadlineReminder;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
 
 class SendScholarshipDeadlineReminders extends Command
 {
@@ -18,11 +17,14 @@ class SendScholarshipDeadlineReminders extends Command
         foreach ([7 => 'reminder_7_sent_at', 1 => 'reminder_1_sent_at'] as $days => $sentColumn) {
             Bookmark::query()
                 ->whereNull($sentColumn)
+                ->whereHas('user', fn ($query) => $query->where('role', 'student'))
                 ->whereHas('scholarship', fn ($query) => $query->published()->whereDate('deadline', today()->addDays($days)))
                 ->with(['user', 'scholarship'])
-                ->each(function (Bookmark $bookmark) use ($days, $sentColumn): void {
-                    Mail::to($bookmark->user)->send(new DeadlineReminder($bookmark->scholarship, $bookmark->user, $days));
-                    $bookmark->update([$sentColumn => now()]);
+                ->chunkById(100, function ($bookmarks) use ($days, $sentColumn): void {
+                    foreach ($bookmarks as $bookmark) {
+                        $bookmark->user->notify(new ScholarshipDeadlineReminder($bookmark->scholarship, $days));
+                        $bookmark->update([$sentColumn => now()]);
+                    }
                 });
         }
 

@@ -21,6 +21,22 @@
             <label class="text-sm font-semibold">Deadline<input class="field mt-1" type="date" name="deadline" value="{{ old('deadline', $scholarship->deadline?->format('Y-m-d')) }}" required></label>
             <label class="text-sm font-semibold sm:col-span-2">URL resmi<input class="field mt-1" type="url" name="official_url" value="{{ old('official_url', $scholarship->official_url) }}" required></label>
             <label class="text-sm font-semibold sm:col-span-2">Deskripsi<textarea class="field mt-1" name="description" rows="6" required>{{ old('description', $scholarship->description) }}</textarea></label>
+            <fieldset class="sm:col-span-2">
+                <legend class="text-sm font-semibold">Kriteria tambahan</legend>
+                <p class="mt-1 text-sm font-normal text-slate-500">Pilih kriteria yang berlaku untuk beasiswa ini.</p>
+                <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                    @forelse ($criteria as $criterion)
+                        <label class="flex items-start gap-3 rounded-xl border border-slate-200 p-3 text-sm">
+                            <input class="mt-1 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600" type="checkbox" name="criteria[]" value="{{ $criterion->id }}" @checked(in_array($criterion->id, $selectedCriteria))>
+                            <span><span class="font-semibold text-slate-900">{{ $criterion->name }}</span>@if ($criterion->description)<span class="mt-1 block font-normal text-slate-500">{{ $criterion->description }}</span>@endif</span>
+                        </label>
+                    @empty
+                        <p class="text-sm text-slate-500">Belum ada kriteria tambahan.</p>
+                    @endforelse
+                </div>
+                @error('criteria')<p class="mt-2 text-sm text-rose-700">{{ $message }}</p>@enderror
+                @error('criteria.*')<p class="mt-2 text-sm text-rose-700">{{ $message }}</p>@enderror
+            </fieldset>
             <label class="text-sm font-semibold sm:col-span-2">Visibilitas<select class="field mt-1" name="is_active" required><option value="1" @selected(old('is_active', $scholarship->exists ? $scholarship->is_active : true))>Aktif dan tampil</option><option value="0" @selected(!old('is_active', $scholarship->exists ? $scholarship->is_active : true))>Nonaktif</option></select></label>
         </div>
         @if($errors->any())<div class="rounded-xl bg-rose-50 p-4 text-sm text-rose-800">Periksa kembali data beasiswa. {{ $errors->first() }}</div>@endif

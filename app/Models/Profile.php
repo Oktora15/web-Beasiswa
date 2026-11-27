@@ -12,7 +12,14 @@ class Profile extends Model
     /** @use HasFactory<ProfileFactory> */
     use HasFactory;
 
-    protected $fillable = ['user_id', 'gpa', 'birth_date', 'ielts_score', 'toefl_score'];
+    protected $fillable = [
+        'user_id',
+        'gpa',
+        'birth_date',
+        'country_of_origin',
+        'ielts_score',
+        'toefl_score',
+    ];
 
     protected function casts(): array
     {
